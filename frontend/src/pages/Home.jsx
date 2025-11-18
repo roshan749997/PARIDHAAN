@@ -3,6 +3,7 @@ import Collections from '../components/Collections';
 import MobileBottomNav from '../components/MobileBottomNav';
 import HeroSlider from '../components/HeroSlider';
 import ShopByGender from '../components/ShopByGender';
+import BestSellers from '../components/BestSellers';
 
 const Home = () => {
   return (
@@ -21,6 +22,9 @@ const Home = () => {
         ]}
         mobileSrc="https://res.cloudinary.com/duc9svg7w/image/upload/v1763383307/file_0000000032ac7209890b93ba8217ac10_1_nfz2u2.png"
       />
+
+      {/* Best Sellers */}
+      <BestSellers />
 
       {/* Shop By Gender */}
       <ShopByGender />
