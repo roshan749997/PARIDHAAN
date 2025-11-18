@@ -11,11 +11,11 @@ const Home = () => {
       <HeroSlider
         slides={[
           {
-            desktop: 'https://res.cloudinary.com/duc9svg7w/image/upload/v1761978463/Effortlessly_smoothen_every_fabric_20251101_014257_0000_pmkwyh.png',
+            desktop: 'https://res.cloudinary.com/duc9svg7w/image/upload/v1763451403/Exclusive_Kurtas_Kurtis_Collection_Where_Tradition_Meets_Modern_Style_1080_x_400_px_2048_x_594_px_lepvuo.svg',
             alt: 'SareeSansaar - Premium Saree Collection',
           },
           {
-            desktop: 'https://res.cloudinary.com/duc9svg7w/image/upload/v1762255943/Green_and_Gold_Traditional_Fashion_Sale_Presentation_20251101_013751_0000_jy3n3g.png',
+            desktop: 'https://res.cloudinary.com/duc9svg7w/image/upload/v1763451863/Elegance_Comfort_Style_2048_x_594_px_wqggd6.svg',
             alt: 'Festive Offer - SareeSansaar',
           },
         ]}
