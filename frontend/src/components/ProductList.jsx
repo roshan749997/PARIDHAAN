@@ -326,7 +326,7 @@ const ProductList = ({ defaultCategory } = {}) => {
         <div className="flex gap-6 relative">
           {/* Desktop Sidebar Filters */}
           <aside className="hidden lg:block w-64 flex-shrink-0">
-            <div className="sticky top-32 bg-white rounded-lg shadow-sm border border-gray-200 p-6 h-[calc(100vh-200px)] overflow-y-auto scrollbar-hide">
+            <div className="sticky top-[120px] bg-white rounded-lg shadow-sm border border-gray-200 p-6 h-[calc(100vh-140px)] overflow-y-auto scrollbar-hide z-10">
               <FilterContent />
             </div>
           </aside>
