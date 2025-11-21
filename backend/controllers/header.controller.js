@@ -25,7 +25,7 @@ export const getHeaderData = async (req, res) => {
     const headerData = {
       logo: {
         url: '/logo.png',
-        alt: 'SareeSansar Logo'
+        alt: 'PARIDHAAN Logo'
       },
       navigation: {
         categories: categories,

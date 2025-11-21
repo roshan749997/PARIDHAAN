@@ -142,7 +142,6 @@ const Navbar = () => {
   // Navigation links
   const navLinks = [
     { name: 'HOME', path: '/' },
-    { name: 'COLLECTIONS', path: '/collections' },
     { name: 'ABOUT', path: '/about' },
     { name: 'CONTACT', path: '/contact' },
   ];
@@ -233,23 +232,8 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Desktop Navigation - Show on md and up */}
-          <div className="hidden md:flex items-center space-x-3 lg:space-x-6 ml-2 md:ml-4 lg:ml-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                onClick={scrollToTop}
-                className="text-gray-700 hover:text-gray-800 font-medium transition-colors duration-200 text-sm whitespace-nowrap"
-              >
-                {link.name}
-              </Link>
-            ))}
-          </div>
-
-          {/* Search Bar & Icons */}
-          <div className="hidden md:flex items-center space-x-2 lg:space-x-3 ml-4 lg:ml-8 flex-1 max-w-3xl">
-            {/* Search Bar - Takes remaining space */}
+          {/* Search Bar - Takes remaining space */}
+          <div className="hidden md:flex items-center flex-1 max-w-3xl ml-4 lg:ml-8">
             <div className="relative w-full" ref={searchWrapRefDesktop}>
               <input
                 type="text"
@@ -280,9 +264,26 @@ const Navbar = () => {
                 </svg>
               </button>
             </div>
+          </div>
+
+          {/* Desktop Navigation & Icons */}
+          <div className="hidden md:flex items-center space-x-2 lg:space-x-3 mr-4 sm:mr-5 md:mr-6 lg:mr-8">
+            {/* Desktop Navigation Links - HOME, ABOUT, CONTACT */}
+            <div className="flex items-center space-x-6 lg:space-x-8">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.name}
+                  to={link.path}
+                  onClick={scrollToTop}
+                  className="text-gray-700 hover:text-gray-800 font-medium transition-colors duration-200 text-sm whitespace-nowrap px-2"
+                >
+                  {link.name}
+                </Link>
+              ))}
+            </div>
 
             {/* Desktop Navigation Icons */}
-            <div className="hidden md:flex items-center space-x-1 mr-4 sm:mr-5 md:mr-6 lg:mr-8">
+            <div className="flex items-center space-x-1">
               <Link to="/wishlist" className="p-2 text-gray-700 hover:text-black relative">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -305,7 +306,10 @@ const Navbar = () => {
               </Link>
             </div>
 
-            {/* User Icon / Login Button */}
+          </div>
+
+          {/* User Icon / Login Button */}
+          <div className="hidden md:flex items-center">
             {isAuthenticated ? (
               <div className="flex items-center space-x-2">
                 <Link
@@ -374,7 +378,7 @@ const Navbar = () => {
         {isMobileMenuOpen && (
           <div id="mobile-menu" className="md:hidden py-6 border-t border-gray-200 bg-white shadow-lg">
             {/* Mobile Navigation Links */}
-            <nav className="grid grid-cols-2 sm:grid-cols-3 gap-2 px-2">
+            <nav className="grid grid-cols-2 sm:grid-cols-3 gap-4 px-2">
               {navLinks.map((link) => (
                 <Link
                   key={link.name}
