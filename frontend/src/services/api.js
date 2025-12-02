@@ -40,6 +40,96 @@ export const fetchCategories = async () => {
   }
 };
 
+// Fetch COLLECTION categories
+export const fetchCollectionCategories = async () => {
+  try {
+    const response = await fetch(`${API_URL}/header/categories/collection`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch COLLECTION categories');
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching COLLECTION categories:', error);
+    throw error;
+  }
+};
+
+// Fetch MEN categories
+export const fetchMenCategories = async () => {
+  try {
+    const response = await fetch(`${API_URL}/header/categories/men`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch MEN categories');
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching MEN categories:', error);
+    throw error;
+  }
+};
+
+// Fetch WOMEN categories
+export const fetchWomenCategories = async () => {
+  try {
+    const response = await fetch(`${API_URL}/header/categories/women`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch WOMEN categories');
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching WOMEN categories:', error);
+    throw error;
+  }
+};
+
+// Fetch BOYS categories
+export const fetchBoysCategories = async () => {
+  try {
+    const response = await fetch(`${API_URL}/header/categories/boys`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch BOYS categories');
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching BOYS categories:', error);
+    throw error;
+  }
+};
+
+// Fetch GIRLS categories
+export const fetchGirlsCategories = async () => {
+  try {
+    const response = await fetch(`${API_URL}/header/categories/girls`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch GIRLS categories');
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching GIRLS categories:', error);
+    throw error;
+  }
+};
+
+// Fetch SISHU categories
+export const fetchSishuCategories = async () => {
+  try {
+    const response = await fetch(`${API_URL}/header/categories/sishu`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch SISHU categories');
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching SISHU categories:', error);
+    throw error;
+  }
+};
+
 export const searchProducts = async (query) => {
   try {
     const response = await fetch(`${API_URL}/header/search?query=${encodeURIComponent(query)}`);

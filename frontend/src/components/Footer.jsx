@@ -75,10 +75,10 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-[#273142] text-white border-t border-gray-700">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <footer className="bg-black text-white border-t border-gray-700">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
           {/* Brand Section */}
           <div className="lg:col-span-2">
             {/* Logo/Brand */}
@@ -86,22 +86,22 @@ const Footer = () => {
             <img 
               src="https://res.cloudinary.com/duc9svg7w/image/upload/v1763530737/a0c8f605-a031-4da5-a3e9-dfcab88fcaec-removebg-preview_s9m928.png" 
               alt="PARIDHAAN Logo" 
-              className="h-25 md:h-70 w-auto hover:scale-105 transition-transform duration-300 mb-6"
+              className="h-20 md:h-24 w-auto hover:scale-105 transition-transform duration-300 mb-3"
             />
           </Link>
             
 
             {/* Social Media */}
             <div>
-              <h4 className="text-lg font-semibold text-white mb-3">Follow Us</h4>
-              <div className="flex space-x-3">
+              <h4 className="text-sm font-semibold text-white mb-2">Follow Us</h4>
+              <div className="flex space-x-2">
                 {socialLinks.map((social) => (
                   <a
                     key={social.name}
                     href={social.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 bg-white/10 rounded-full text-white hover:bg-white/20 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-110"
+                    className="p-1.5 bg-white/10 rounded-full text-white hover:bg-white/20 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-110"
                     aria-label={social.name}
                   >
                     {social.icon}
@@ -113,11 +113,11 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold text-white mb-4 relative inline-block">
+            <h3 className="text-sm font-semibold text-white mb-2 relative inline-block">
               Quick Links
               <span className="absolute bottom-0 left-0 w-full h-0.5 bg-white"></span>
             </h3>
-            <ul className="space-y-2">
+            <ul className="space-y-1">
               {quickLinks.map((link) => (
                 <li key={link.name}>
                   <Link
@@ -134,11 +134,11 @@ const Footer = () => {
 
           {/* Categories */}
           <div>
-            <h3 className="text-lg font-semibold text-white mb-4 relative inline-block">
+            <h3 className="text-sm font-semibold text-white mb-2 relative inline-block">
               Categories
               <span className="absolute bottom-0 left-0 w-full h-0.5 bg-white"></span>
             </h3>
-            <ul className="space-y-2">
+            <ul className="space-y-1">
               {categories.map((category) => (
                 <li key={category.name}>
                   <Link
@@ -155,11 +155,11 @@ const Footer = () => {
 
           {/* Customer Service */}
           <div>
-            <h3 className="text-lg font-semibold text-white mb-4 relative inline-block">
+            <h3 className="text-sm font-semibold text-white mb-2 relative inline-block">
               Customer Service
               <span className="absolute bottom-0 left-0 w-full h-0.5 bg-white"></span>
             </h3>
-            <ul className="space-y-2">
+            <ul className="space-y-1">
               {customerService.map((service) => (
                 <li key={service.name}>
                   <Link
@@ -178,11 +178,11 @@ const Footer = () => {
 
 
         {/* Copyright */}
-        <div className="border-t border-gray-700 pt-6 text-center">
-          <p className="text-gray-300 text-sm mb-2">
+        <div className="border-t border-gray-700 pt-3 text-center">
+          <p className="text-gray-300 text-xs mb-1">
             © {currentYear} <span className="font-semibold text-white">PARIDHAAN</span>. All rights reserved.
           </p>
-          <p className="text-xs text-gray-400 mb-4">
+          <p className="text-xs text-gray-400 mb-2">
             GSTIN: 27ABCDE1234F1Z5 | CIN: U74999MH2020PTC123456
           </p>
           <div className="flex justify-center space-x-4 text-xs text-gray-400">

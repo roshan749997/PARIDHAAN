@@ -25,72 +25,72 @@ const Header = () => {
       name: 'MEN', 
       path: '/category/Men',
       subcategories: [
-        { name: 'Bestsellers', path: '/category/Men/bestsellers' },
-        { name: 'New Arrivals', path: '/category/Men/new-arrivals' },
+        { name: 'Men Bestsellers', path: '/category/Men/men-bestsellers' },
+        { name: 'Men New Arrivals', path: '/category/Men/men-new-arrivals' },
         { name: 'Kurtas', path: '/category/Men/kurtas' },
-        { name: 'Kurta Sets', path: '/category/Men/kurta-sets' },
+        { name: 'Men Kurta Sets', path: '/category/Men/men-kurta-sets' },
         { name: 'Kurta Dupatta Sets', path: '/category/Men/kurta-dupatta-sets' },
         { name: 'Sherwanis', path: '/category/Men/sherwanis' },
-        { name: 'Nehru Jackets', path: '/category/Men/nehru-jackets' },
+        { name: 'Men Nehru Jackets', path: '/category/Men/men-nehru-jackets' },
         { name: 'Blazers', path: '/category/Men/blazers' },
         { name: 'Plus Size', path: '/category/Men/plus-size' },
         { name: 'Bottomwear', path: '/category/Men/bottomwear' },
         { name: 'Jhodpuris', path: '/category/Men/jhodpuris' },
         { name: 'Shirts', path: '/category/Men/shirts' },
         { name: 'Dupattas & Accessories', path: '/category/Men/dupattas-accessories' },
-        { name: 'Comfort Wear', path: '/category/Men/comfort-wear' },
-        { name: 'Co-ord Sets', path: '/category/Men/co-ord-sets' },
-        { name: 'Shop All', path: '/category/Men/shop-all' }
+        { name: 'Men Comfort Wear', path: '/category/Men/men-comfort-wear' },
+        { name: 'Men Co-ord Sets', path: '/category/Men/men-co-ord-sets' },
+        { name: 'Men Shop All', path: '/category/Men/men-shop-all' }
       ]
     },
     {
       name: 'WOMEN',
       path: '/category/Women',
       subcategories: [
-        { name: 'New Arrivals', path: '/category/Women/new-arrivals' },
+        { name: 'Women New Arrivals', path: '/category/Women/women-new-arrivals' },
         { name: 'Kurtis', path: '/category/Women/kurtis' },
-        { name: 'Kurti Sets', path: '/category/Women/kurti-sets' },
-        { name: 'Comfort Wear', path: '/category/Women/comfort-wear' },
-        { name: 'Co-ord Sets', path: '/category/Women/co-ord-sets' },
-        { name: 'Shop All', path: '/category/Women/shop-all' }
+        { name: 'Women Kurti Sets', path: '/category/Women/women-kurti-sets' },
+        { name: 'Women Comfort Wear', path: '/category/Women/women-comfort-wear' },
+        { name: 'Women Co-ord Sets', path: '/category/Women/women-co-ord-sets' },
+        { name: 'Women Shop All', path: '/category/Women/women-shop-all' }
       ]
     },
     { 
       name: 'BOYS', 
       path: '/category/Boys',
       subcategories: [
-        { name: 'Bestsellers', path: '/category/Boys/bestsellers' },
-        { name: 'New Arrivals', path: '/category/Boys/new-arrivals' },
-        { name: 'Kurta Sets', path: '/category/Boys/kurta-sets' },
-        { name: 'Nehru Jackets', path: '/category/Boys/nehru-jackets' },
+        { name: 'Boys Bestsellers', path: '/category/Boys/boys-bestsellers' },
+        { name: 'Boys New Arrivals', path: '/category/Boys/boys-new-arrivals' },
+        { name: 'Boys Kurta Sets', path: '/category/Boys/boys-kurta-sets' },
+        { name: 'Boys Nehru Jackets', path: '/category/Boys/boys-nehru-jackets' },
         { name: 'Sherwani Set', path: '/category/Boys/sherwani-set' },
         { name: 'Ethnic Shirt', path: '/category/Boys/ethnic-shirt' },
         { name: 'Jodhpuri Set', path: '/category/Boys/jodhpuri-set' },
-        { name: 'Comfort Wear', path: '/category/Boys/comfort-wear' },
-        { name: 'Shop All', path: '/category/Boys/shop-all' }
+        { name: 'Boys Comfort Wear', path: '/category/Boys/boys-comfort-wear' },
+        { name: 'Boys Shop All', path: '/category/Boys/boys-shop-all' }
       ]
     },
     { 
       name: 'GIRLS', 
       path: '/category/Girls',
       subcategories: [
-        { name: 'Bestsellers', path: '/category/Girls/bestsellers' },
-        { name: 'New Arrivals', path: '/category/Girls/new-arrivals' },
+        { name: 'Girls Bestsellers', path: '/category/Girls/girls-bestsellers' },
+        { name: 'Girls New Arrivals', path: '/category/Girls/girls-new-arrivals' },
         { name: 'Dress', path: '/category/Girls/dress' },
-        { name: 'Kurti Set', path: '/category/Girls/kurti-set' },
+        { name: 'Girls Kurti Set', path: '/category/Girls/girls-kurti-set' },
         { name: 'Lehenga Set', path: '/category/Girls/lehenga-set' },
         { name: 'Anarkali', path: '/category/Girls/anarkali' },
-        { name: 'Comfort Wear', path: '/category/Girls/comfort-wear' },
-        { name: 'Shop All', path: '/category/Girls/shop-all' }
+        { name: 'Girls Comfort Wear', path: '/category/Girls/girls-comfort-wear' },
+        { name: 'Girls Shop All', path: '/category/Girls/girls-shop-all' }
       ]
     },
     { 
       name: 'SISHU', 
       path: '/category/Sishu',
       subcategories: [
-        { name: 'Boys', path: '/category/Sishu/boys' },
-        { name: 'Girls', path: '/category/Sishu/girls' },
-        { name: 'Shop All', path: '/category/Sishu/shop-all' }
+        { name: 'Sishu Boys', path: '/category/Sishu/sishu-boys' },
+        { name: 'Sishu Girls', path: '/category/Sishu/sishu-girls' },
+        { name: 'Sishu Shop All', path: '/category/Sishu/sishu-shop-all' }
       ]
     },
   ];

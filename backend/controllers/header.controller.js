@@ -85,3 +85,213 @@ export const searchProducts = async (req, res) => {
     res.status(500).json({ message: 'Error performing search', error: error.message });
   }
 };
+
+// Helper function to set CORS headers
+const setCorsHeaders = (req, res) => {
+  const allowedOrigins = [
+    'https://sarees-frontend.onrender.com',
+    'https://sarees-jwhn.onrender.com',
+    'http://localhost:5173',
+    'http://localhost:5174'
+  ];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+};
+
+// Get COLLECTION category with subcategories
+export const getCollectionCategories = async (req, res) => {
+  setCorsHeaders(req, res);
+  try {
+    const category = await Category.findOne({ 
+      $or: [
+        { name: { $regex: /^collection$/i } },
+        { slug: 'collection' }
+      ]
+    }).populate('subcategories', 'name slug -_id');
+    
+    if (!category) {
+      return res.json({ 
+        category: { name: 'COLLECTION', slug: 'collection', subcategories: [] },
+        subcategories: []
+      });
+    }
+
+    res.json({
+      category: {
+        name: category.name,
+        slug: category.slug,
+        subcategories: category.subcategories || []
+      },
+      subcategories: category.subcategories || []
+    });
+  } catch (error) {
+    console.error('Error fetching COLLECTION categories:', error);
+    res.status(500).json({ message: 'Error fetching COLLECTION categories', error: error.message });
+  }
+};
+
+// Get MEN category with subcategories
+export const getMenCategories = async (req, res) => {
+  setCorsHeaders(req, res);
+  try {
+    const category = await Category.findOne({ 
+      $or: [
+        { name: { $regex: /^men$/i } },
+        { slug: 'men' }
+      ]
+    }).populate('subcategories', 'name slug -_id');
+    
+    if (!category) {
+      return res.json({ 
+        category: { name: 'MEN', slug: 'men', subcategories: [] },
+        subcategories: []
+      });
+    }
+
+    res.json({
+      category: {
+        name: category.name,
+        slug: category.slug,
+        subcategories: category.subcategories || []
+      },
+      subcategories: category.subcategories || []
+    });
+  } catch (error) {
+    console.error('Error fetching MEN categories:', error);
+    res.status(500).json({ message: 'Error fetching MEN categories', error: error.message });
+  }
+};
+
+// Get WOMEN category with subcategories
+export const getWomenCategories = async (req, res) => {
+  setCorsHeaders(req, res);
+  try {
+    const category = await Category.findOne({ 
+      $or: [
+        { name: { $regex: /^women$/i } },
+        { slug: 'women' }
+      ]
+    }).populate('subcategories', 'name slug -_id');
+    
+    if (!category) {
+      return res.json({ 
+        category: { name: 'WOMEN', slug: 'women', subcategories: [] },
+        subcategories: []
+      });
+    }
+
+    res.json({
+      category: {
+        name: category.name,
+        slug: category.slug,
+        subcategories: category.subcategories || []
+      },
+      subcategories: category.subcategories || []
+    });
+  } catch (error) {
+    console.error('Error fetching WOMEN categories:', error);
+    res.status(500).json({ message: 'Error fetching WOMEN categories', error: error.message });
+  }
+};
+
+// Get BOYS category with subcategories
+export const getBoysCategories = async (req, res) => {
+  setCorsHeaders(req, res);
+  try {
+    const category = await Category.findOne({ 
+      $or: [
+        { name: { $regex: /^boys$/i } },
+        { slug: 'boys' }
+      ]
+    }).populate('subcategories', 'name slug -_id');
+    
+    if (!category) {
+      return res.json({ 
+        category: { name: 'BOYS', slug: 'boys', subcategories: [] },
+        subcategories: []
+      });
+    }
+
+    res.json({
+      category: {
+        name: category.name,
+        slug: category.slug,
+        subcategories: category.subcategories || []
+      },
+      subcategories: category.subcategories || []
+    });
+  } catch (error) {
+    console.error('Error fetching BOYS categories:', error);
+    res.status(500).json({ message: 'Error fetching BOYS categories', error: error.message });
+  }
+};
+
+// Get GIRLS category with subcategories
+export const getGirlsCategories = async (req, res) => {
+  setCorsHeaders(req, res);
+  try {
+    const category = await Category.findOne({ 
+      $or: [
+        { name: { $regex: /^girls$/i } },
+        { slug: 'girls' }
+      ]
+    }).populate('subcategories', 'name slug -_id');
+    
+    if (!category) {
+      return res.json({ 
+        category: { name: 'GIRLS', slug: 'girls', subcategories: [] },
+        subcategories: []
+      });
+    }
+
+    res.json({
+      category: {
+        name: category.name,
+        slug: category.slug,
+        subcategories: category.subcategories || []
+      },
+      subcategories: category.subcategories || []
+    });
+  } catch (error) {
+    console.error('Error fetching GIRLS categories:', error);
+    res.status(500).json({ message: 'Error fetching GIRLS categories', error: error.message });
+  }
+};
+
+// Get SISHU category with subcategories
+export const getSishuCategories = async (req, res) => {
+  setCorsHeaders(req, res);
+  try {
+    const category = await Category.findOne({ 
+      $or: [
+        { name: { $regex: /^sishu$/i } },
+        { slug: 'sishu' }
+      ]
+    }).populate('subcategories', 'name slug -_id');
+    
+    if (!category) {
+      return res.json({ 
+        category: { name: 'SISHU', slug: 'sishu', subcategories: [] },
+        subcategories: []
+      });
+    }
+
+    res.json({
+      category: {
+        name: category.name,
+        slug: category.slug,
+        subcategories: category.subcategories || []
+      },
+      subcategories: category.subcategories || []
+    });
+  } catch (error) {
+    console.error('Error fetching SISHU categories:', error);
+    res.status(500).json({ message: 'Error fetching SISHU categories', error: error.message });
+  }
+};
