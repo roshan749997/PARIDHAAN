@@ -3,7 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const [activeCategory, setActiveCategory] = useState(null);
+  const [dropdownPosition, setDropdownPosition] = useState({ left: 0, top: 0 });
   const headerRef = useRef(null);
+  const categoryRefs = useRef({});
   const navigate = useNavigate();
 
   const categories = [
@@ -184,6 +186,30 @@ const Header = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Update dropdown position on scroll or resize
+  useEffect(() => {
+    if (!activeCategory) return;
+    
+    const updatePosition = () => {
+      if (categoryRefs.current[activeCategory]) {
+        const rect = categoryRefs.current[activeCategory].getBoundingClientRect();
+        setDropdownPosition({
+          left: rect.left + rect.width / 2,
+          top: rect.bottom + 4
+        });
+      }
+    };
+
+    updatePosition();
+    window.addEventListener('scroll', updatePosition, true);
+    window.addEventListener('resize', updatePosition);
+    
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', updatePosition);
+    };
+  }, [activeCategory]);
+
   const handleClick = (categoryName, e) => {
     // Only toggle category if it's not a link click
     if (e && e.target.tagName === 'A') {
@@ -192,102 +218,128 @@ const Header = () => {
       }
       return;
     }
+    
+    // Calculate dropdown position
+    if (categoryRefs.current[categoryName]) {
+      const rect = categoryRefs.current[categoryName].getBoundingClientRect();
+      setDropdownPosition({
+        left: rect.left + rect.width / 2,
+        top: rect.bottom + 4
+      });
+    }
+    
     setActiveCategory(prev => (prev === categoryName ? null : categoryName));
   };
 
   return (
     <header className="sticky top-16 md:top-20 z-40 bg-white border-t border-gray-200 shadow-sm">
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center justify-center space-x-8 py-3" ref={headerRef}>
-          {categories.map((category) => (
-            <div key={category.name} className="relative group">
-              <div 
-                className={`flex items-center text-gray-700 hover:text-rose-500 font-medium text-sm whitespace-nowrap transition-colors duration-200 relative cursor-pointer ${
-                  activeCategory === category.name ? 'text-rose-500' : ''
-                }`}
-                onClick={() => handleClick(category.name)}
-              >
-                {category.name}
-                <svg
-                  className={`w-4 h-4 ml-1 transition-transform duration-200 ${
-                    activeCategory === category.name ? 'rotate-180' : ''
-                  }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-pink-400 to-amber-400 group-hover:w-full transition-all duration-300"></span>
-              </div>
-
-              {/* Dropdown */}
-              {category.subcategories && activeCategory === category.name && (
-                <div className="absolute left-1/2 transform -translate-x-1/2 mt-1 z-50">
-                  <div className="bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden w-56">
-                    <Link
-                      to={category.path}
-                      className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-rose-500 border-b border-gray-100"
-                      onClick={() => setActiveCategory(null)}
+      <div className="relative w-full">
+        {/* Desktop/Tablet Navigation - Horizontal Scroll */}
+        <div className="hidden md:block relative z-50" ref={headerRef}>
+          <div className="w-full py-3 relative" style={{ overflowY: 'visible' }}>
+            <div className="w-full overflow-x-auto overflow-y-visible hide-scrollbar scroll-smooth">
+              <div className="flex items-center space-x-8 min-w-max px-4 sm:px-6 lg:px-8">
+                {categories.map((category) => (
+                  <div key={category.name} className="relative group shrink-0">
+                    <div 
+                      ref={el => categoryRefs.current[category.name] = el}
+                      className={`flex items-center text-gray-700 hover:text-rose-500 font-medium text-sm whitespace-nowrap transition-colors duration-200 relative cursor-pointer ${
+                        activeCategory === category.name ? 'text-rose-500' : ''
+                      }`}
+                      onClick={() => handleClick(category.name)}
                     >
-                      All {category.name}
-                    </Link>
-                    <div className="max-h-[60vh] overflow-y-auto custom-scrollbar">
-                      {category.subcategories.map((subcategory) => (
-                        <Link
-                          key={subcategory.name}
-                          to={subcategory.path}
-                          className="block px-4 py-2.5 text-sm text-gray-600 hover:bg-rose-50 hover:text-rose-500 transition-colors duration-150"
-                          onClick={() => setActiveCategory(null)}
-                        >
-                          {subcategory.name}
-                        </Link>
-                      ))}
+                      {category.name}
+                      <svg
+                        className={`w-4 h-4 ml-1 transition-transform duration-200 shrink-0 ${
+                          activeCategory === category.name ? 'rotate-180' : ''
+                        }`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                      <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-pink-400 to-amber-400 group-hover:w-full transition-all duration-300"></span>
                     </div>
                   </div>
-                </div>
-              )}
+                ))}
+              </div>
             </div>
-          ))}
+          </div>
+          
+          {/* Dropdown - Outside overflow container with fixed positioning */}
+          {activeCategory && categories.find(cat => cat.name === activeCategory)?.subcategories && (
+            <div 
+              className="fixed z-[100]"
+              style={{
+                left: `${dropdownPosition.left}px`,
+                top: `${dropdownPosition.top}px`,
+                transform: 'translateX(-50%)'
+              }}
+            >
+              <div className="bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden w-56">
+                <Link
+                  to={categories.find(cat => cat.name === activeCategory)?.path || '#'}
+                  className="block px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-rose-500 border-b border-gray-100"
+                  onClick={() => setActiveCategory(null)}
+                >
+                  All {activeCategory}
+                </Link>
+                <div className="max-h-[60vh] overflow-y-auto custom-scrollbar">
+                  {categories.find(cat => cat.name === activeCategory)?.subcategories?.map((subcategory) => (
+                    <Link
+                      key={subcategory.name}
+                      to={subcategory.path}
+                      className="block px-4 py-2.5 text-sm text-gray-600 hover:bg-rose-50 hover:text-rose-500 transition-colors duration-150"
+                      onClick={() => setActiveCategory(null)}
+                    >
+                      {subcategory.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Mobile Navigation - Horizontal Scroll */}
-        <div className="md:hidden -mx-4 relative z-50">
-          {/* Main Categories */}
-          <div className="flex space-x-1 overflow-x-auto px-4 pt-3 pb-2 hide-scrollbar sticky top-16 z-50 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/70 border-b border-gray-200">
-            {categories.map((category) => (
-              <div key={category.name} className="shrink-0">
-                <button
-                  onClick={(e) => {
-                    // First tap opens subcategories, second tap navigates to the category page
-                    if (activeCategory === category.name) {
-                      setActiveCategory(null);
-                      navigate(category.path);
-                    } else {
-                      handleClick(category.name, e);
-                    }
-                  }}
-                  className={`px-4 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap relative flex items-center ${
-                    activeCategory === category.name 
-                      ? 'text-rose-500 border-b-2 border-rose-500' 
-                      : 'text-gray-700 hover:text-rose-500 border-b-2 border-transparent'
-                  }`}
-                >
-                  {category.name}
-                  <svg
-                    className={`w-4 h-4 ml-1 transition-transform duration-200 ${
-                      activeCategory === category.name ? 'rotate-180' : ''
+        <div className="md:hidden relative z-50">
+          {/* Main Categories - Horizontal Scrollable */}
+          <div className="w-full overflow-x-auto overflow-y-hidden hide-scrollbar sticky top-16 z-50 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/70 border-b border-gray-200">
+            <div className="flex space-x-1 px-4 pt-3 pb-2 min-w-max">
+              {categories.map((category) => (
+                <div key={category.name} className="shrink-0">
+                  <button
+                    onClick={(e) => {
+                      // First tap opens subcategories, second tap navigates to the category page
+                      if (activeCategory === category.name) {
+                        setActiveCategory(null);
+                        navigate(category.path);
+                      } else {
+                        handleClick(category.name, e);
+                      }
+                    }}
+                    className={`px-4 py-2 text-sm font-medium transition-colors duration-200 whitespace-nowrap relative flex items-center ${
+                      activeCategory === category.name 
+                        ? 'text-rose-500 border-b-2 border-rose-500' 
+                        : 'text-gray-700 hover:text-rose-500 border-b-2 border-transparent'
                     }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-              </div>
-            ))}
+                    {category.name}
+                    <svg
+                      className={`w-4 h-4 ml-1 transition-transform duration-200 shrink-0 ${
+                        activeCategory === category.name ? 'rotate-180' : ''
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
           
           {/* Subcategories */}
@@ -392,12 +444,19 @@ const Header = () => {
           <style jsx>{`
             .hide-scrollbar::-webkit-scrollbar {
               display: none;
+              width: 0;
               height: 0;
             }
             .hide-scrollbar {
               -ms-overflow-style: none;
               scrollbar-width: none;
-              scrollbar-height: none;
+            }
+            /* Smooth scrolling for mobile */
+            @media (max-width: 767px) {
+              .hide-scrollbar {
+                -webkit-overflow-scrolling: touch;
+                scroll-behavior: smooth;
+              }
             }
             .custom-scrollbar {
               scrollbar-width: thin;
