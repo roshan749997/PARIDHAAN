@@ -18,7 +18,7 @@ const Header = () => {
         { name: 'Deewangi collection', path: '/category/Collection/deewangi-collection' },
         { name: 'Mehrang collection', path: '/category/Collection/mehrang-collection' },
         { name: 'Virsa collection', path: '/category/Collection/virsa-collection' },
-        { name: 'Barati broz collection', path: '/category/Collection/barati-broz-collection' },
+        { name: 'Barati broz ', path: '/category/Collection/barati-broz' },
       ]
     },
     { 
@@ -34,7 +34,7 @@ const Header = () => {
         { name: 'Blazers', path: '/category/Men/blazers' },
         { name: 'Bottomwear', path: '/category/Men/bottomwear' },
         { name: 'Jhodpuris', path: '/category/Men/jhodpuris' },
-        { name: 'Men Shirts', path: '/category/Men/men-shirts' }
+        { name: 'TShirt', path: '/category/Men/tshirt' }
       ]
     },
     {
