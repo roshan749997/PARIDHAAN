@@ -9,7 +9,7 @@ export default async function cookieJwtAuth(req, res, next) {
     const payload = jwt.verify(token, secret);
     const userId = payload.id || payload._id || payload.userId;
     if (!userId) return res.status(401).json({ message: 'Invalid token' });
-    const user = await User.findById(userId).select('name email isAdmin googleId avatar provider');
+    const user = await User.findById(userId).select('name email phone gender isAdmin googleId avatar provider');
     if (!user) return res.status(401).json({ message: 'User not found' });
     req.user = user;
     req.userId = String(user._id);

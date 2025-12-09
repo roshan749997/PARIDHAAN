@@ -32,9 +32,9 @@ const OrderSchema = new mongoose.Schema(
     amount: { type: Number, required: true },
     currency: { type: String, default: 'INR' },
     status: { type: String, enum: ['created', 'paid', 'failed'], default: 'paid' },
-    razorpayOrderId: { type: String },
-    razorpayPaymentId: { type: String },
-    razorpaySignature: { type: String },
+    payuTxnId: { type: String },
+    payuPaymentId: { type: String },
+    payuHash: { type: String },
     shippingAddress: { type: ShippingAddressSchema },
   },
   { timestamps: true }

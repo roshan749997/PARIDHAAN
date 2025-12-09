@@ -8,5 +8,6 @@ export default defineConfig({
   server: {
     port: 5174,
     strictPort: true,
+    // Vite automatically handles SPA routing - all routes serve index.html
   },
 })

@@ -189,14 +189,17 @@ export const deleteAddressById = async (id) => {
   return res.json();
 };
 
-export const createPaymentOrder = async (amount, notes = {}) => {
-  const res = await fetch(`${API_URL}/payment/orders`, {
+export const createPayUTxn = async (amount, name, email, phone) => {
+  const res = await fetch(`${API_URL}/payment/payu/create`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeaders() },
-    body: JSON.stringify({ amount, currency: 'INR', notes }),
+    body: JSON.stringify({ amount, name, email, phone }),
     credentials: 'include',
   });
-  if (!res.ok) throw new Error('Failed to create payment order');
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(errorData.error || 'Failed to create PayU transaction');
+  }
   return res.json();
 };
 
