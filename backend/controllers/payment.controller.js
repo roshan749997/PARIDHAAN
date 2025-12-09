@@ -3,6 +3,31 @@ import Cart from '../models/Cart.js';
 import Order from '../models/Order.js';
 import { Address } from '../models/Address.js';
 
+/**
+ * PayU LIVE Integration - Production Configuration
+ * 
+ * IMPORTANT: Configure these URLs in your PayU Merchant Dashboard:
+ * 
+ * Success URL: https://paridhaan-4.onrender.com/payment-success
+ * Fail URL:    https://paridhaan-4.onrender.com/payment-fail
+ * Callback:    https://paridhaan-3.onrender.com/api/payment/payu/callback
+ * 
+ * Payment Flow:
+ * 1. User initiates payment → Frontend submits form to https://secure.payu.in/_payment
+ * 2. PayU processes payment → Sends POST callback to backend /api/payment/payu/callback
+ * 3. Backend verifies payment → Creates order → Returns 200 OK to PayU
+ * 4. PayU redirects user → Frontend /payment-success or /payment-fail (GET redirect)
+ * 
+ * Environment Variables Required:
+ * - PAYU_KEY: Your PayU merchant key
+ * - PAYU_SALT: Your PayU merchant salt
+ * - PAYU_SUCCESS_URL: https://paridhaan-4.onrender.com/payment-success
+ * - PAYU_FAIL_URL: https://paridhaan-4.onrender.com/payment-fail
+ * - PAYU_CALLBACK_URL: https://paridhaan-3.onrender.com/api/payment/payu/callback (optional, auto-generated)
+ * - FRONTEND_URL: https://paridhaan-4.onrender.com
+ * - BACKEND_URL: https://paridhaan-3.onrender.com
+ */
+
 // PayU transaction creation
 export const createPayUTxn = async (req, res) => {
   try {
@@ -84,21 +109,23 @@ export const createPayUTxn = async (req, res) => {
     
     const hash = crypto.createHash('sha512').update(hashString).digest('hex');
 
-    // Backend callback URLs (PayU sends POST here first, then redirects user via GET)
-    const BACKEND_URL = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 7000}`;
-    const callbackSuccessUrl = process.env.PAYU_CALLBACK_SUCCESS_URL || `${BACKEND_URL}/api/payment/payu/callback?status=success`;
-    const callbackFailUrl = process.env.PAYU_CALLBACK_FAIL_URL || `${BACKEND_URL}/api/payment/payu/callback?status=fail`;
+    // PayU Success and Fail URLs (where PayU redirects user after payment)
+    // These MUST be frontend URLs as PayU redirects users here via GET
+    // Production: https://paridhaan-4.onrender.com/payment-success
+    // Production: https://paridhaan-4.onrender.com/payment-fail
+    const surl = process.env.PAYU_SUCCESS_URL || `${process.env.FRONTEND_URL || 'http://localhost:5174'}/payment-success`;
+    const furl = process.env.PAYU_FAIL_URL || `${process.env.FRONTEND_URL || 'http://localhost:5174'}/payment-fail`;
 
-    // Frontend redirect URLs (where user is redirected after backend processes POST)
-    const frontendSuccessUrl = process.env.PAYU_SUCCESS_URL || `${process.env.FRONTEND_URL || 'http://localhost:5174'}/payment-success`;
-    const frontendFailUrl = process.env.PAYU_FAIL_URL || `${process.env.FRONTEND_URL || 'http://localhost:5174'}/payment-fail`;
+    // PayU Callback URL (where PayU sends POST for server-side verification)
+    // This is configured in PayU dashboard and used server-side only
+    // Production: https://paridhaan-3.onrender.com/api/payment/payu/callback
+    // Note: Callback URL is NOT sent to frontend, only used in PayU dashboard configuration
+    const callbackUrl = process.env.PAYU_CALLBACK_URL || `${process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 7000}`}/api/payment/payu/callback`;
 
     // Store txnid -> userId mapping if userId is available (from optional auth)
     // This helps us find the user during callback when PayU sends POST
     const userId = req.userId || null;
     if (userId) {
-      // Store mapping in a simple in-memory cache or you could use Redis/DB
-      // For now, we'll rely on email lookup in callback, but this could be improved
       console.log('PayU transaction created for userId:', userId, 'txnid:', txnid);
     }
 
@@ -111,13 +138,10 @@ export const createPayUTxn = async (req, res) => {
       email,
       phone,
       hash,
-      // PayU surl/furl receive POST callbacks, then redirect user via GET
-      // Set to backend callback URLs - backend will handle POST and redirect to frontend
-      surl: callbackSuccessUrl,
-      furl: callbackFailUrl,
-      // Store frontend URLs for redirect after POST processing
-      frontendSuccessUrl,
-      frontendFailUrl,
+      // PayU surl/furl - Frontend URLs where PayU redirects user after payment (GET redirect)
+      // These are sent to PayU in the payment form
+      surl,
+      furl,
     });
   } catch (err) {
     console.error('createPayUTxn err', err);
@@ -125,14 +149,19 @@ export const createPayUTxn = async (req, res) => {
   }
 };
 
-// PayU payment verification (called by PayU via POST on success/failure, then user redirected via GET)
-// This endpoint handles both POST (PayU server callback) and GET (user browser redirect)
+// PayU payment verification (called by PayU via POST callback for server-side verification)
+// This endpoint ONLY handles POST requests from PayU server
+// PayU dashboard must be configured with: https://paridhaan-3.onrender.com/api/payment/payu/callback
+// User redirects go directly to frontend URLs (surl/furl) - NOT to this endpoint
 export const verifyPayUPayment = async (req, res) => {
   try {
-    // Get data from POST body (PayU server callback) or query params (user redirect)
-    const isPost = req.method === 'POST';
-    const dataSource = isPost ? req.body : req.query;
-    
+    // This endpoint should ONLY receive POST requests from PayU server
+    if (req.method !== 'POST') {
+      console.warn('PayU callback: Received non-POST request, ignoring');
+      return res.status(405).json({ error: 'Method not allowed. This endpoint only accepts POST from PayU server.' });
+    }
+
+    // Get data from POST body (PayU server callback)
     const {
       txnid,
       amount,
@@ -147,47 +176,39 @@ export const verifyPayUPayment = async (req, res) => {
       bank_ref_num,
       error,
       error_Message,
-    } = dataSource;
+    } = req.body;
 
-    // Frontend redirect URLs
+    // Frontend redirect URLs (for reference, but user is already redirected by PayU)
     const frontendSuccessUrl = process.env.PAYU_SUCCESS_URL || `${process.env.FRONTEND_URL || 'http://localhost:5174'}/payment-success`;
     const frontendFailUrl = process.env.PAYU_FAIL_URL || `${process.env.FRONTEND_URL || 'http://localhost:5174'}/payment-fail`;
 
-    // If GET request without required data, redirect to fail page
-    if (!isPost && (!txnid || !status)) {
-      console.warn('PayU callback: GET request without required data, redirecting to fail');
-      return res.redirect(`${frontendFailUrl}?error=Invalid callback data`);
+    // Validate required fields for POST callback
+    if (!txnid || !amount || !hash) {
+      console.error('PayU POST callback: Missing required fields');
+      return res.status(400).json({ error: 'Missing required fields from PayU callback' });
     }
 
-    // For POST requests (PayU server callback), verify and process payment
-    if (isPost) {
-      if (!txnid || !amount || !hash) {
-        console.error('PayU POST callback: Missing required fields');
-        // Still redirect user to fail page
-        return res.redirect(`${frontendFailUrl}?error=Missing required fields`);
-      }
+    const salt = process.env.PAYU_SALT;
+    const payuKey = process.env.PAYU_KEY;
 
-      const salt = process.env.PAYU_SALT;
-      const payuKey = process.env.PAYU_KEY;
+    if (!salt || !payuKey) {
+      console.error('PayU POST callback: Server secret missing');
+      return res.status(500).json({ error: 'Server configuration error' });
+    }
 
-      if (!salt || !payuKey) {
-        console.error('PayU POST callback: Server secret missing');
-        return res.redirect(`${frontendFailUrl}?error=Server configuration error`);
-      }
+    // Verify hash: key|txnid|amount|productinfo|firstname|email|status|||||||||||salt
+    const hashString = `${payuKey}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|${status}|||||||||||${salt}`;
+    const expectedHash = crypto.createHash('sha512').update(hashString).digest('hex');
 
-      // Verify hash: key|txnid|amount|productinfo|firstname|email|status|||||||||||salt
-      const hashString = `${payuKey}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|${status}|||||||||||${salt}`;
-      const expectedHash = crypto.createHash('sha512').update(hashString).digest('hex');
+    if (expectedHash !== hash) {
+      console.error('PayU hash verification failed');
+      return res.status(400).json({ error: 'Invalid hash verification' });
+    }
 
-      if (expectedHash !== hash) {
-        console.error('PayU hash verification failed');
-        return res.redirect(`${frontendFailUrl}?error=Invalid hash verification`);
-      }
+    // Hash verified - payment is legitimate
+    const isSuccess = status === 'success';
 
-      // Hash verified - payment is legitimate
-      const isSuccess = status === 'success';
-
-      if (isSuccess) {
+    if (isSuccess) {
         // Try to find user by email (PayU provides email in callback)
         // We need to find the user who initiated this transaction
         // Option 1: Store txnid -> userId mapping before redirect (better approach)
@@ -255,22 +276,22 @@ export const verifyPayUPayment = async (req, res) => {
           }
         } catch (orderErr) {
           console.error('PayU POST callback: Error creating order', orderErr);
-          // Continue to redirect even if order creation fails
+          // Log error but still return success to PayU (order can be created later via frontend verification)
         }
       }
-    }
 
-    // After processing POST (or for GET requests), redirect user to frontend
-    // Build redirect URL with transaction details
-    const redirectUrl = status === 'success' 
-      ? `${frontendSuccessUrl}?txnid=${txnid}&status=${status}${mihpayid ? `&mihpayid=${mihpayid}` : ''}`
-      : `${frontendFailUrl}?txnid=${txnid || ''}&status=${status || 'failed'}${error_Message ? `&error=${encodeURIComponent(error_Message)}` : error ? `&error=${encodeURIComponent(error)}` : ''}`;
-
-    return res.redirect(redirectUrl);
+    // Return success response to PayU server (PayU expects 200 OK)
+    // User is already redirected to frontend by PayU, so we don't redirect here
+    return res.status(200).json({ 
+      success: true, 
+      message: 'Payment callback processed',
+      txnid,
+      status 
+    });
   } catch (err) {
     console.error('PayU verifyPayment error:', err?.message || err);
-    const frontendFailUrl = process.env.PAYU_FAIL_URL || `${process.env.FRONTEND_URL || 'http://localhost:5174'}/payment-fail`;
-    return res.redirect(`${frontendFailUrl}?error=Verification failed`);
+    // Return error to PayU but don't redirect (user already redirected by PayU)
+    return res.status(500).json({ error: 'Verification failed', txnid: req.body?.txnid || 'unknown' });
   }
 };
 

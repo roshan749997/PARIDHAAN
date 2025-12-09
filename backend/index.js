@@ -29,10 +29,13 @@ const server = express();
 // When behind proxy (Render)
 server.set('trust proxy', 1);
 
-// 🚀 **OPEN CORS FOR ALL ORIGINS**
+// CORS configuration for production and development
 server.use(
   cors({
-    origin: true,  // reflects request origin automatically
+    origin: [
+      'http://localhost:5174',  // Frontend development
+      'https://paridhaan-4.onrender.com',  // Frontend production
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
