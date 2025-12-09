@@ -1,7 +1,8 @@
 import React, { useState, useContext, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { getMyAddress, saveMyAddress, deleteAddressById, createPaymentOrder, verifyPayment } from '../services/api';
+import { getMyAddress, saveMyAddress, deleteAddressById, createPayUTxn, verifyPayment } from '../services/api';
+import { api } from '../utils/api';
 
 const indianStates = [
   'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
@@ -65,6 +66,7 @@ export default function AddressForm() {
 
   const [showSuccess, setShowSuccess] = useState(false);
   const [showForm, setShowForm] = useState(true);
+  const [userEmail, setUserEmail] = useState('');
   const { cart, cartTotal: total, loadCart } = useCart();
 
   // Calculate price details
@@ -95,49 +97,85 @@ export default function AddressForm() {
       alert('Please save your delivery address first.');
       return;
     }
+    
+    // Validate required fields
+    if (!formData.name || !formData.mobile) {
+      alert('Please ensure your name and mobile number are saved in the address.');
+      return;
+    }
+    
+    if (!userEmail) {
+      alert('Unable to fetch your email. Please refresh the page and try again.');
+      return;
+    }
+    
     try {
-      if (!window.Razorpay) {
-        await new Promise((resolve, reject) => {
-          const s = document.createElement('script');
-          s.src = 'https://checkout.razorpay.com/v1/checkout.js';
-          s.onload = resolve;
-          s.onerror = reject;
-          document.body.appendChild(s);
-        });
-      }
       const amount = priceDetails.total;
-      const { order, key } = await createPaymentOrder(amount, {
-        name: formData.name,
-        mobile: formData.mobile,
-        city: formData.city,
+      if (!amount || amount <= 0) {
+        alert('Invalid order amount. Please check your cart.');
+        return;
+      }
+      
+      console.log('Creating PayU transaction with:', {
+        amount,
+        name: formData.name.trim(),
+        email: userEmail.trim(),
+        phone: formData.mobile.trim()
       });
-      const options = {
-        key,
-        amount: order.amount,
-        currency: order.currency,
-        name: 'PARIDHAAN',
-        description: 'Elegance in Every Drape',
-        order_id: order.id,
-        prefill: { name: formData.name || '', contact: formData.mobile || '' },
-        theme: { color: '#000000' },
-        handler: async function (response) {
-          try {
-            const r = await verifyPayment(response);
-            if (r && r.success) {
-              await loadCart();
-              navigate('/profile?tab=orders');
-            } else {
-              alert('Payment verification failed');
-            }
-          } catch (e) {
-            alert('Payment verification failed');
-          }
-        },
+      
+      const payuData = await createPayUTxn(
+        amount,
+        formData.name.trim(),
+        userEmail.trim(),
+        formData.mobile.trim()
+      );
+
+      console.log('PayU transaction created:', payuData);
+
+      // Create a form and auto-submit to PayU
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = 'https://test.payu.in/_payment'; // PayU test URL
+      form.id = 'payuForm';
+
+      // Add ALL required PayU fields in EXACT order and naming
+      const addField = (name, value) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = value || '';
+        form.appendChild(input);
       };
-      const rzp = new window.Razorpay(options);
-      rzp.open();
+
+      // Required fields (must match backend hash calculation order)
+      addField('key', payuData.key);
+      addField('txnid', payuData.txnid);
+      addField('amount', payuData.amount);
+      addField('productinfo', payuData.productinfo);
+      addField('firstname', payuData.firstname);
+      addField('email', payuData.email);
+      
+      // UDF fields (required even if empty - must be present for hash to match)
+      addField('udf1', '');
+      addField('udf2', '');
+      addField('udf3', '');
+      addField('udf4', '');
+      addField('udf5', '');
+      
+      // Additional required fields
+      addField('phone', payuData.phone);
+      addField('surl', payuData.surl);
+      addField('furl', payuData.furl);
+      addField('hash', payuData.hash);
+
+      document.body.appendChild(form);
+      
+      // Auto-submit the form
+      form.submit();
     } catch (e) {
-      alert('Unable to start payment');
+      console.error('Payment error:', e);
+      const errorMessage = e.message || 'Unable to start payment. Please try again.';
+      alert(errorMessage);
     }
   };
 
@@ -262,11 +300,19 @@ export default function AddressForm() {
     console.log('Cancel clicked');
   };
 
-  // Load existing address on mount
+  // Load existing address and user email on mount
   useEffect(() => {
     const load = async () => {
       try {
         setLoadingAddress(true);
+        // Fetch user email
+        try {
+          const userData = await api.me();
+          setUserEmail(userData.user?.email || '');
+        } catch (e) {
+          console.error('Failed to fetch user email:', e);
+        }
+        
         const doc = await getMyAddress();
         if (doc && doc._id) {
           setAddressId(doc._id);

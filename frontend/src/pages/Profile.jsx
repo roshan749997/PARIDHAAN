@@ -51,6 +51,14 @@ export default function FlipkartAccountSettings() {
   const fetchUserData = async () => {
     try {
       const userData = await api.me();
+      console.log('User data received:', userData); // Debug log
+      
+      if (!userData || !userData.user) {
+        console.error('No user data in response');
+        setLoading(false);
+        return;
+      }
+      
       const [firstName, ...lastNameParts] = userData.user?.name?.split(' ') || [];
       const lastName = lastNameParts.join(' ');
       // Derive admin from server response and sync to storage for route guards
@@ -64,15 +72,17 @@ export default function FlipkartAccountSettings() {
       } catch {}
 
       setUser({
-        firstName: firstName || '',
+        firstName: firstName || 'User',
         lastName: lastName || '',
-        email: userData.user?.email || '',
-        mobile: userData.user?.phone || '',
+        email: userData.user?.email || 'Not available',
+        mobile: userData.user?.phone || 'Not available',
         gender: userData.user?.gender || 'male'
       });
       setIsAdmin(adminStatus);
     } catch (error) {
       console.error('Error fetching user data:', error);
+      // Show error to user
+      alert('Failed to load user profile. Please refresh the page.');
     } finally {
       setLoading(false);
     }
@@ -99,6 +109,16 @@ export default function FlipkartAccountSettings() {
     fetchUserData();
     fetchAddresses();
   }, []);
+
+  // Update phone from address if user phone is not available
+  useEffect(() => {
+    if (addresses.length > 0 && !user.mobile) {
+      const addressPhone = addresses[0]?.mobileNumber;
+      if (addressPhone) {
+        setUser(prev => ({ ...prev, mobile: addressPhone }));
+      }
+    }
+  }, [addresses, user.mobile]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);

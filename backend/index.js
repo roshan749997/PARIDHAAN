@@ -19,9 +19,9 @@ import cookieJwtAuth from './middleware/authMiddleware.js';
 configDotenv();
 
 console.log(
-  'Razorpay env loaded:',
-  Boolean(process.env.RAZORPAY_KEY_ID),
-  Boolean(process.env.RAZORPAY_KEY_SECRET)
+  'PayU env loaded:',
+  Boolean(process.env.PAYU_KEY),
+  Boolean(process.env.PAYU_SALT)
 );
 
 const server = express();
@@ -50,8 +50,19 @@ server.use(passport.initialize());
 server.get('/api/health', (req, res) => res.json({ ok: true }));
 
 // Current user route (cookie + JWT)
-server.get('/api/me', cookieJwtAuth, (req, res) => {
-  res.json({ user: req.user });
+server.get('/api/me', cookieJwtAuth, async (req, res) => {
+  try {
+    // Fetch fresh user data with all required fields
+    const User = (await import('./models/User.js')).default;
+    const user = await User.findById(req.userId).select('name email phone gender isAdmin googleId avatar provider createdAt updatedAt');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json({ user });
+  } catch (error) {
+    console.error('Error fetching user in /api/me:', error);
+    res.status(500).json({ message: 'Failed to load user data' });
+  }
 });
 
 // Routes

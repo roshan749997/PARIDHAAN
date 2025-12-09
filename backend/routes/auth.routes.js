@@ -15,7 +15,7 @@ router.post('/reset-password', resetPassword);
 // Get current user profile
 router.get('/me', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.userId).select('name email isAdmin createdAt updatedAt');
+    const user = await User.findById(req.userId).select('name email phone gender isAdmin createdAt updatedAt');
     if (!user) return res.status(404).json({ message: 'User not found' });
     res.json({ user });
   } catch (e) {
@@ -24,7 +24,7 @@ router.get('/me', auth, async (req, res) => {
 });
 
 // Google OAuth2
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5174';
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_change_me';
 
 router.get('/google',

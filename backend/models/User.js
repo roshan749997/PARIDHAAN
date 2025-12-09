@@ -5,6 +5,8 @@ const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, index: true },
+    phone: { type: String, trim: true },
+    gender: { type: String, enum: ['male', 'female', 'other'], default: 'male' },
     // Optional for OAuth users
     passwordHash: { type: String },
     // OAuth fields

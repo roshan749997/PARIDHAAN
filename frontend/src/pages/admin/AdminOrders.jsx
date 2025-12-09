@@ -183,7 +183,7 @@ const AdminOrders = () => {
                     <div className="text-xs text-gray-600 mb-1">Payment Status</div>
                     <div className="flex items-center h-[34px]">
                       <StatusBadge 
-                        paymentStatus={o.status === 'failed' ? 'failed' : o.razorpayPaymentId ? 'paid' : 'pending'}
+                        paymentStatus={o.status === 'failed' ? 'failed' : o.payuPaymentId ? 'paid' : 'pending'}
                       />
                     </div>
                   </div>
@@ -253,7 +253,7 @@ const AdminOrders = () => {
                   </td>
                   <td className="p-2">
                     <StatusBadge 
-                      paymentStatus={o.status === 'failed' ? 'failed' : o.razorpayPaymentId ? 'paid' : 'pending'}
+                      paymentStatus={o.status === 'failed' ? 'failed' : o.payuPaymentId ? 'paid' : 'pending'}
                     />
                   </td>
                   <td className="p-2">
