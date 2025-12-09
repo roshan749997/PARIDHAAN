@@ -22,30 +22,27 @@ const PaymentSuccess = () => {
         allParams: Object.fromEntries(searchParams.entries())
       });
 
-      // If txnid exists, try to verify
+      // Always redirect to profile after a short delay, regardless of verification
+      // Verification is optional and happens in background
+      const redirectTimer = setTimeout(() => {
+        navigate('/profile?tab=orders', { replace: true });
+      }, 2000);
+
+      // Try to verify in background (non-blocking)
       if (txnid) {
         try {
           const result = await verifyPayment({ txnid });
           if (result && result.success) {
             await loadCart();
-            // Redirect after short delay
-            setTimeout(() => {
-              navigate('/profile?tab=orders', { replace: true });
-            }, 1500);
+            console.log('Payment verified successfully');
           } else {
+            console.warn('Payment verification returned false');
             setError('Payment verification failed, but redirecting...');
-            // Still redirect even if verification fails
-            setTimeout(() => {
-              navigate('/profile?tab=orders', { replace: true });
-            }, 2500);
           }
         } catch (e) {
           console.error('Verification error:', e);
           setError('Payment verification failed, but redirecting...');
-          // Redirect even on error
-          setTimeout(() => {
-            navigate('/profile?tab=orders', { replace: true });
-          }, 2500);
+          // Don't block redirect on verification error
         } finally {
           setVerifying(false);
         }
@@ -53,10 +50,9 @@ const PaymentSuccess = () => {
         // No txnid - still redirect to profile
         setError('Transaction ID not found');
         setVerifying(false);
-        setTimeout(() => {
-          navigate('/profile?tab=orders', { replace: true });
-        }, 2000);
       }
+
+      return () => clearTimeout(redirectTimer);
     };
 
     verify();

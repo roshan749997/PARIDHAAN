@@ -7,10 +7,10 @@ const PaymentFail = () => {
   const errorMsg = searchParams.get('error') || searchParams.get('error_Message') || searchParams.get('error_message') || 'Payment failed';
 
   useEffect(() => {
-    // Auto-redirect to profile after 5 seconds
+    // Auto-redirect to profile after 3 seconds (reduced from 5)
     const timer = setTimeout(() => {
       navigate('/profile?tab=orders', { replace: true });
-    }, 5000);
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, [navigate]);
