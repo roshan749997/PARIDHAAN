@@ -2,6 +2,7 @@ import { configDotenv } from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import compression from 'compression';
 import passport, { setupPassport } from './config/passport.js';
 
 import authRoutes from './routes/auth.routes.js';
@@ -28,6 +29,9 @@ const server = express();
 
 // When behind proxy (Render)
 server.set('trust proxy', 1);
+
+// Enable response compression for faster transfers
+server.use(compression());
 
 // 🚀 **OPEN CORS FOR ALL ORIGINS**
 server.use(

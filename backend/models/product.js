@@ -32,6 +32,12 @@ const productSchema = new mongoose.Schema(
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
+// Add indexes for better query performance
+productSchema.index({ category: 1 }); // Already defined in schema, but explicit
+productSchema.index({ categoryId: 1 }); // Already defined in schema, but explicit
+productSchema.index({ title: 'text' }); // Text search index for title
+productSchema.index({ createdAt: -1 }); // For sorting by newest
+
 // 💡 Virtual field: Automatically calculate final price after discount
 productSchema.virtual("price").get(function () {
   const discount = (this.mrp * this.discountPercent) / 100;

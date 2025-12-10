@@ -48,19 +48,7 @@ const Header = () => {
         
       ]
     },
-    { 
-      name: 'BOYS', 
-      path: '/category/Boys',
-      subcategories: [
-        
-        { name: 'Boys Kurta Sets', path: '/category/Boys/boys-kurta-sets' },
-        { name: 'Boys Nehru Jackets', path: '/category/Boys/boys-nehru-jackets' },
-        { name: 'Sherwani Set', path: '/category/Boys/sherwani-set' },
-        { name: 'Ethnic Shirt', path: '/category/Boys/ethnic-shirt' },
-        { name: 'Jodhpuri Set', path: '/category/Boys/jodhpuri-set' },
-       
-      ]
-    },
+    
     { 
       name: 'GIRLS', 
       path: '/category/Girls',

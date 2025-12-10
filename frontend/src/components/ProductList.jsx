@@ -452,6 +452,8 @@ const ProductList = ({ defaultCategory } = {}) => {
                       <img
                         src={p.images?.image1 || 'https://via.placeholder.com/300x400?text=Image+Not+Available'}
                         alt={p.title}
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         onError={(e) => {
                           e.target.onerror = null;
