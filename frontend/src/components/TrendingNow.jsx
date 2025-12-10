@@ -1,24 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaRupeeSign, FaHeart, FaRegHeart } from 'react-icons/fa';
+import { FaRupeeSign, FaHeart, FaRegHeart, FaSpinner } from 'react-icons/fa';
 import { fetchSarees } from '../services/api';
 
 const TrendingNow = () => {
-  const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]); // Store all products
+  const [displayedProducts, setDisplayedProducts] = useState([]); // Products to display
   const [wishlist, setWishlist] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const observerTarget = useRef(null);
   const navigate = useNavigate();
 
+  const PRODUCTS_PER_BATCH = 24; // Load 24 products at a time (6 rows on desktop, 12 rows on mobile)
+
+  // Load initial products
   useEffect(() => {
     const loadProducts = async () => {
       try {
+        setLoading(true);
         const data = await fetchSarees('');
-        // Filter products with images and show all products
-        const availableProducts = data
-          .filter(p => p.images?.image1);
+        // Filter products with images - get ALL products
+        const availableProducts = data.filter(p => p.images?.image1);
         
-        setProducts(availableProducts);
+        setAllProducts(availableProducts);
+        // Display first batch
+        setDisplayedProducts(availableProducts.slice(0, PRODUCTS_PER_BATCH));
+        setHasMore(availableProducts.length > PRODUCTS_PER_BATCH);
       } catch (error) {
         console.error('Error loading trending products:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -34,6 +47,51 @@ const TrendingNow = () => {
       console.error('Error loading wishlist:', e);
     }
   }, []);
+
+  // Load more products when scrolling
+  const loadMoreProducts = useCallback(() => {
+    if (loadingMore || !hasMore) return;
+
+    setLoadingMore(true);
+    
+    // Simulate slight delay for smooth UX
+    setTimeout(() => {
+      const currentCount = displayedProducts.length;
+      const nextBatch = allProducts.slice(currentCount, currentCount + PRODUCTS_PER_BATCH);
+      
+      if (nextBatch.length > 0) {
+        setDisplayedProducts(prev => [...prev, ...nextBatch]);
+        setHasMore(currentCount + nextBatch.length < allProducts.length);
+      } else {
+        setHasMore(false);
+      }
+      
+      setLoadingMore(false);
+    }, 300);
+  }, [allProducts, displayedProducts.length, loadingMore, hasMore]);
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+          loadMoreProducts();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [hasMore, loadingMore, loadMoreProducts]);
 
   const toggleWishlist = (productId, e) => {
     e.stopPropagation();
@@ -75,7 +133,27 @@ const TrendingNow = () => {
     navigate(`/product/${product._id}`);
   };
 
-  if (products.length === 0) {
+  if (loading && displayedProducts.length === 0) {
+    return (
+      <section className="py-16 px-4 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-5xl md:text-6xl font-serif text-gray-800 mb-3 tracking-wide" style={{ fontFamily: 'serif' }}>
+              Trending Now
+            </h2>
+            <p className="text-base md:text-lg text-gray-600 font-light italic">
+              Serving looks, garma-garam!
+            </p>
+          </div>
+          <div className="flex justify-center items-center py-20">
+            <FaSpinner className="animate-spin text-4xl text-gray-400" />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (displayedProducts.length === 0) {
     return null;
   }
 
@@ -94,7 +172,7 @@ const TrendingNow = () => {
 
         {/* Product Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {products.map((product) => {
+          {displayedProducts.map((product) => {
             const price = calculatePrice(product);
             const mrp = product.mrp || 0;
             const discount = calculateDiscount(product);
@@ -111,6 +189,8 @@ const TrendingNow = () => {
                   <img
                     src={product.images?.image1 || 'https://via.placeholder.com/300x400?text=Image+Not+Available'}
                     alt={product.title}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     onError={(e) => {
                       e.target.onerror = null;
@@ -170,6 +250,25 @@ const TrendingNow = () => {
             );
           })}
         </div>
+
+        {/* Loading More Indicator & Observer Target */}
+        {hasMore && (
+          <div ref={observerTarget} className="flex justify-center items-center py-8">
+            {loadingMore && (
+              <div className="flex items-center gap-3 text-gray-600">
+                <FaSpinner className="animate-spin text-2xl" />
+                <span className="text-lg">Loading more products...</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* End of Products Message */}
+        {!hasMore && displayedProducts.length > 0 && (
+          <div className="text-center py-8 text-gray-500">
+            <p>You've seen all trending products! 🎉</p>
+          </div>
+        )}
       </div>
     </section>
   );

@@ -18,7 +18,10 @@ export const getProducts = async (req, res) => {
     const category = rawCategory.replace(/-/g, ' ').trim();
     let query = {};
 
-    console.log('Received request with query params:', req.query);
+    // Only log in development mode
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Received request with query params:', req.query);
+    }
 
     if (category) {
       // Try multiple ways to match the category or subcategory fields
@@ -39,50 +42,56 @@ export const getProducts = async (req, res) => {
 
       query = { $or: orConditions };
 
-      console.log('Search query:', JSON.stringify(query, null, 2));
-    }
-
-    // Get all products (for debugging)
-    const allProducts = await Product.find({});
-    console.log(`Total products in database: ${allProducts.length}`);
-    
-    if (allProducts.length > 0) {
-      console.log('Sample product:', {
-        _id: allProducts[0]._id,
-        title: allProducts[0].title,
-        category: allProducts[0].category,
-        price: allProducts[0].price
-      });
-      
-      // Log all unique categories in the database
-      const categories = [...new Set(allProducts.map(p => 
-        p.category ? (typeof p.category === 'string' ? p.category : p.category.name) : 'None'
-      ))];
-      console.log('All categories in database:', categories);
-    }
-
-    // Execute the query
-    let products = await Product.find(query);
-    console.log(`Found ${products.length} matching products`);
-
-    // Process image URLs to ensure they're absolute
-    products = products.map(product => {
-      const productObj = product.toObject();
-      if (productObj.images && Array.isArray(productObj.images)) {
-        productObj.images = productObj.images.map(img => {
-          if (img && img.url && !img.url.startsWith('http')) {
-            // If the URL is relative, make it absolute
-            const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 7000}`;
-            return {
-              ...img,
-              url: img.url.startsWith('/') ? `${baseUrl}${img.url}` : `${baseUrl}/${img.url}`
-            };
-          }
-          return img;
-        });
+      // Only log in development mode
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Search query:', JSON.stringify(query, null, 2));
       }
-      return productObj;
-    });
+    }
+
+    // Execute the query directly (removed unnecessary allProducts query for performance)
+    // Use lean() for better performance - returns plain JS objects instead of Mongoose documents
+    // Select only needed fields to reduce response size and improve performance
+    let products = await Product.find(query)
+      .select('title mrp discountPercent description category categoryId product_info images createdAt updatedAt')
+      .lean();
+    
+    // Only log in development mode
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`Found ${products.length} matching products`);
+    }
+
+    // Process image URLs to ensure they're absolute (only if needed)
+    // Skip processing if BASE_URL is not set (assumes URLs are already absolute)
+    const baseUrl = process.env.BASE_URL;
+    if (baseUrl) {
+      products = products.map(product => {
+        // Handle both array and object image formats
+        if (product.images) {
+          if (Array.isArray(product.images)) {
+            product.images = product.images.map(img => {
+              if (img && img.url && !img.url.startsWith('http')) {
+                return {
+                  ...img,
+                  url: img.url.startsWith('/') ? `${baseUrl}${img.url}` : `${baseUrl}/${img.url}`
+                };
+              }
+              return img;
+            });
+          } else {
+            // Handle object format: { image1: 'url', image2: 'url', ... }
+            Object.keys(product.images).forEach(key => {
+              const imgUrl = product.images[key];
+              if (imgUrl && typeof imgUrl === 'string' && !imgUrl.startsWith('http')) {
+                product.images[key] = imgUrl.startsWith('/') 
+                  ? `${baseUrl}${imgUrl}` 
+                  : `${baseUrl}/${imgUrl}`;
+              }
+            });
+          }
+        }
+        return product;
+      });
+    }
     
     res.json(products);
   } catch (error) {
@@ -97,30 +106,40 @@ export const getProducts = async (req, res) => {
 
 export const getProductById = async (req, res) => {
   try {
-    let product = await Product.findById(req.params.id);
+    // Use lean() for better performance
+    // Select all fields for product detail page (needs full info)
+    let product = await Product.findById(req.params.id).lean();
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
-
-    // Convert to plain object to modify
-    const productObj = product.toObject();
     
-    // Process image URLs to ensure they're absolute
-    if (productObj.images && Array.isArray(productObj.images)) {
-      productObj.images = productObj.images.map(img => {
-        if (img && img.url && !img.url.startsWith('http')) {
-          // If the URL is relative, make it absolute
-          const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 6000}`;
-          return {
-            ...img,
-            url: img.url.startsWith('/') ? `${baseUrl}${img.url}` : `${baseUrl}/${img.url}`
-          };
-        }
-        return img;
-      });
+    // Process image URLs to ensure they're absolute (only if BASE_URL is set)
+    const baseUrl = process.env.BASE_URL;
+    if (baseUrl && product.images) {
+      if (Array.isArray(product.images)) {
+        product.images = product.images.map(img => {
+          if (img && img.url && !img.url.startsWith('http')) {
+            return {
+              ...img,
+              url: img.url.startsWith('/') ? `${baseUrl}${img.url}` : `${baseUrl}/${img.url}`
+            };
+          }
+          return img;
+        });
+      } else {
+        // Handle object format: { image1: 'url', image2: 'url', ... }
+        Object.keys(product.images).forEach(key => {
+          const imgUrl = product.images[key];
+          if (imgUrl && typeof imgUrl === 'string' && !imgUrl.startsWith('http')) {
+            product.images[key] = imgUrl.startsWith('/') 
+              ? `${baseUrl}${imgUrl}` 
+              : `${baseUrl}/${imgUrl}`;
+          }
+        });
+      }
     }
     
-    res.json(productObj);
+    res.json(product);
   } catch (error) {
     console.error('Error fetching product:', error);
     res.status(500).json({ 

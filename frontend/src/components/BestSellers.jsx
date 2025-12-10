@@ -26,7 +26,9 @@ const BestSellers = () => {
           .filter(p => p.images?.image1 && !productsWithDiscount.find(prod => prod._id === p._id));
         
         // Combine: discount products first, then regular products
-        setProducts([...productsWithDiscount, ...regularProducts]);
+        // Limit to first 100 products for better performance
+        const allProducts = [...productsWithDiscount, ...regularProducts];
+        setProducts(allProducts.slice(0, 100));
       } catch (error) {
         console.error('Error loading best sellers:', error);
       }
@@ -300,6 +302,8 @@ const BestSellers = () => {
                   <img
                     src={product.images?.image1 || 'https://via.placeholder.com/300x400?text=Image+Not+Available'}
                     alt={product.title}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     onError={(e) => {
                       e.target.onerror = null;
